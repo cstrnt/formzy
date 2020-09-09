@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
+    "post:build": "prisma migrate save --experimental && prisma migrate up --experimental",
     "start": "next start -p $PORT",
     "heroku-postbuild": "npm run build",
     "type-check": "tsc"
