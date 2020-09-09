@@ -7,13 +7,11 @@ import {
   Grid,
   Input,
   Button,
-  Link as ChakraLink,
   useToast,
 } from '@chakra-ui/core'
 import { Submission, Form } from '@prisma/client'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import { ssrFetch, fetcher } from '../../../src/lib/helpers'
 
