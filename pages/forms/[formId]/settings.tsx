@@ -1,10 +1,10 @@
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 import { Heading, Box, Flex, IconButton, Grid, Input } from '@chakra-ui/core'
 import { Form, Submission } from '@prisma/client'
 import { useRouter } from 'next/router'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import { ssrFetch } from '../../../src/lib/helpers'
-import { ChangeEvent, FormEvent } from 'react'
+import { FormEvent } from 'react'
 
 type returnData = Form & { submissions: Submission[] }
 
