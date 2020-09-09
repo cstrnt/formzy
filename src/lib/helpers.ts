@@ -48,10 +48,7 @@ export async function ssrFetch<T>(
     },
     method: 'GET',
   }
-  const response = await fetch(
-    `${'http://localhost:3000'}/api${endpoint}`,
-    config
-  )
+  const response = await fetch(`${process.env.BASE_URL}/api${endpoint}`, config)
   if (response.ok) {
     const data = await response.json()
     return data as T
