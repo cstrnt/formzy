@@ -1,0 +1,30 @@
+datasource db {
+  provider = "postgresql"
+  url = "***"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Form {
+  id            Int      @default(autoincrement()) @id
+  name          String
+  users         User[]
+  submissions   Submission[]
+}
+
+model Submission {
+  id        Int      @default(autoincrement()) @id
+  createdAt DateTime @default(now())
+  form      Form     @relation(fields: [formId], references: [id])
+  formId    Int
+}
+
+model User {
+  id                Int      @default(autoincrement()) @id
+  email             String   @unique
+  name              String?
+  hashedPassword    String
+  forms             Form[]
+}
