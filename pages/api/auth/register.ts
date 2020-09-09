@@ -7,11 +7,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'POST') {
       throw new Error()
     }
-    const { email, password } = req.body
+    const { email, password, name } = req.body
     const hashedPassword = await hash(password, 10)
     const client = new PrismaClient()
     await client.user.create({
       data: {
+        name,
         email,
         hashedPassword,
       },

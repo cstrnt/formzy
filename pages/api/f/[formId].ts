@@ -10,13 +10,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       throw new Error()
     }
 
-    await client.form.update({
+    const formData = await client.form.update({
       where: { id: Number(formId) },
       data: { submissions: { create: { content: req.body } } },
     })
 
     await client.$disconnect()
-    res.status(200)
+    res.writeHead(302, {
+      Location: formData.hasCustomCallback
+        ? (formData.callbackUrl as string)
+        : `${process.env.BASE_URL}/thank-you/${formData.id}`,
+    })
     res.end()
   } catch (e) {
     console.error(e)

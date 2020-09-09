@@ -19,15 +19,21 @@ type returnData = Form & { submissions: Submission[] }
 export const getServerSideProps: GetServerSideProps = async ({
   req,
   params,
+  res,
 }) => {
-  if (params?.formId) {
-    const data = await ssrFetch<returnData>(`/forms/${params?.formId}`, req)
-    return { props: { data } }
+  try {
+    if (params?.formId) {
+      const data = await ssrFetch<returnData>(`/forms/${params?.formId}`, req)
+      return { props: { data } }
+    }
+  } catch (e) {
+    res.writeHead(302, { Location: '/' })
+    res.end()
   }
   return { props: { data: {} } }
 }
 
-const IndexPage = (
+const FormsPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
   const { query, push } = useRouter()
@@ -39,19 +45,21 @@ const IndexPage = (
   if (!data) return <div>loading...</div>
   return (
     <Box w="full">
-      <IconButton
-        aria-label="go back"
-        icon="arrow-back"
-        variantColor="green"
-        onClick={() => {
-          push(`/`)
-        }}
-        mb={6}
-      />
+      <Link href="/">
+        <IconButton
+          aria-label="go back"
+          icon="arrow-back"
+          variantColor="green"
+          mb={6}
+        />
+      </Link>
       <Flex justifyContent="space-between" mb={6}>
-        <Heading fontWeight="bold" size="2xl">
-          {data.name}
-        </Heading>
+        <Box>
+          <Heading size="2xl">{data.name}</Heading>
+          <Heading size="sm" color="gray.600">
+            FormID: {data.id}
+          </Heading>
+        </Box>
         <IconButton
           icon="settings"
           aria-label="settings"
@@ -80,7 +88,7 @@ const IndexPage = (
             justifyContent="space-between"
             maxW="600px"
           >
-            <Text>Submission No. {submission.id}</Text>
+            <Text>Submission (ID: {submission.id})</Text>
             <Text>({dayjs(submission.createdAt).from(dayjs())})</Text>
           </PseudoBox>
         </Link>
@@ -89,4 +97,4 @@ const IndexPage = (
   )
 }
 
-export default IndexPage
+export default FormsPage

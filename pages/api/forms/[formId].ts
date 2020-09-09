@@ -10,15 +10,29 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (!userId || !id) {
       throw new Error('Invalid user or formId')
     }
+    switch (req.method) {
+      case 'GET': {
+        const form = await client.form.findOne({
+          where: { id },
+          include: { submissions: true, users: true },
+        })
 
-    const form = await client.form.findOne({
-      where: { id },
-      include: { submissions: true, users: { where: { id: userId } } },
-    })
+        await client.$disconnect()
+        res.status(200)
+        res.json(form)
+        break
+      }
+      case 'DELETE': {
+        const form = await client.form.delete({
+          where: { id },
+        })
 
-    await client.$disconnect()
-    res.status(200)
-    res.json(form)
+        await client.$disconnect()
+        res.status(200)
+        res.json(form)
+        break
+      }
+    }
   } catch (e) {
     console.error(e)
     res.status(500)

@@ -1,3 +1,4 @@
+import React from 'react'
 import useSWR from 'swr'
 import {
   Heading,
@@ -7,39 +8,66 @@ import {
   Input,
   Button,
   Link as ChakraLink,
+  useToast,
 } from '@chakra-ui/core'
 import { Submission, Form } from '@prisma/client'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { ssrFetch } from '../../../src/lib/helpers'
+import { ssrFetch, fetcher } from '../../../src/lib/helpers'
 
 type returnData = Submission & { form: Form }
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
   params,
+  res,
 }) => {
-  if (params?.submissionId) {
-    const data = await ssrFetch<returnData>(
-      `/submissions/${params?.submissionId}`,
-      req
-    )
-    return { props: { data } }
+  try {
+    if (params?.submissionId) {
+      const data = await ssrFetch<returnData>(
+        `/submissions/${params?.submissionId}`,
+        req
+      )
+      return { props: { data } }
+    }
+  } catch (e) {
+    res.writeHead(302, { Location: '/' })
+    res.end()
   }
   return { props: { data: {} } }
 }
 
-const IndexPage = (
+const SubmissionPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
+  const toast = useToast()
   const { query, push } = useRouter()
   const { submissionId } = query
   const { data, error } = useSWR<Submission & { form: Form }>(
     submissionId ? `/submissions/${submissionId}` : null,
     { initialData: props.data }
   )
+
+  const handleDelete = async () => {
+    try {
+      await fetcher(`/submissions/${submissionId}`, {
+        method: 'DELETE',
+      })
+      toast({
+        position: 'top',
+        title: `Successfully deleted Submission No ${submissionId}`,
+      })
+      push(`/forms/${data?.form.id}`)
+    } catch (e) {
+      toast({
+        position: 'top',
+        status: 'error',
+        title: `Something went wrong`,
+      })
+    }
+  }
   if (error) return <p>Error</p>
   if (!data) return <div>loading...</div>
   return (
@@ -55,11 +83,7 @@ const IndexPage = (
       />
 
       <Heading fontWeight="bold" size="2xl">
-        Submission {data.id} (
-        <Link href={`/forms/${data.form.id}`} passHref>
-          <ChakraLink>form {data.form.name}</ChakraLink>
-        </Link>
-        )
+        Submission (ID: {data.id})
       </Heading>
 
       <Heading size="sm" fontWeight={400} color="gray.700">
@@ -74,17 +98,17 @@ const IndexPage = (
         alignItems="center"
       >
         {Object.keys(data.content as any).map((key) => (
-          <>
+          <React.Fragment key={key}>
             <Heading size="md">{key}</Heading>
             <Input value={(data.content as any)[key]} isDisabled />
-          </>
+          </React.Fragment>
         ))}
       </Grid>
-      <Button size="sm" variantColor="red" mt={8}>
+      <Button size="sm" variantColor="red" mt={8} onClick={handleDelete}>
         Delete Submission
       </Button>
     </Box>
   )
 }
 
-export default IndexPage
+export default SubmissionPage

@@ -10,14 +10,7 @@ import {
   Stack,
   Flex,
   Heading,
-  Link as ChakraLink,
-  Text,
 } from '@chakra-ui/core'
-
-import { GetServerSideProps } from 'next'
-import { ssrFetch } from '../src/lib/helpers'
-import { mutate } from 'swr'
-import Link from 'next/link'
 
 function LoginPage() {
   const toast = useToast()
@@ -25,22 +18,27 @@ function LoginPage() {
     defaultValues: {
       email: '',
       password: '',
+      name: '',
     },
   })
   const { push } = useRouter()
 
-  const onSubmit = async (values: any) => {
-    const res = await fetch('/api/auth/login', {
+  const onSubmit = async ({ name, email, password }: any) => {
+    const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify({ name, email, password }),
       credentials: 'include',
     })
     if (res.ok) {
-      push('/forms')
-      mutate('/auth/me')
+      toast({
+        position: 'top',
+        status: 'info',
+        title: 'Success! Please log in now.',
+      })
+      push('/')
     } else {
       toast({
         position: 'top',
@@ -63,6 +61,16 @@ function LoginPage() {
       </Heading>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={4}>
+          <FormControl isInvalid={!!errors.name}>
+            <FormLabel htmlFor="name">Name</FormLabel>
+            <Input
+              id="name"
+              name="name"
+              aria-describedby="name-helper-text"
+              ref={register({ required: 'Required' })}
+            />
+            <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
+          </FormControl>
           <FormControl isInvalid={!!errors.email}>
             <FormLabel htmlFor="email">Email address</FormLabel>
             <Input
@@ -86,33 +94,12 @@ function LoginPage() {
             <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
           </FormControl>
           <Button type="submit" variantColor="green">
-            Log In
+            Sign Up
           </Button>
-          <Link href="/register" passHref>
-            <ChakraLink
-              textAlign="center"
-              _hover={{ textDecoration: 'none' }}
-              _active={{ border: 'none' }}
-            >
-              No account yet?{' '}
-              <Text display="inline" textDecoration="underline">
-                Create One
-              </Text>
-            </ChakraLink>
-          </Link>
         </Stack>
       </form>
     </Flex>
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  try {
-    await ssrFetch('/auth/me', req)
-    res.writeHead(302, { Location: '/forms' })
-    res.end()
-  } catch (e) {}
-  return { props: {} }
 }
 
 export default LoginPage

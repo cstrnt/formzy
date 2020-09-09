@@ -15,12 +15,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     await client.form.create({
-      data: { name, users: { connect: { id: userId } } },
+      data: {
+        name: name || 'New Form',
+        adminId: userId,
+        users: { connect: { id: userId } },
+      },
     })
 
     await client.$disconnect()
     res.status(200)
-    res.end()
+    res.json({ success: true })
   } catch (e) {
     console.error(e)
     res.status(500)

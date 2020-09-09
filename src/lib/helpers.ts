@@ -1,5 +1,5 @@
 import { NextApiRequest } from 'next'
-
+import Router from 'next/router'
 import { verify } from 'jsonwebtoken'
 import { User } from '@prisma/client'
 import { IncomingMessage } from 'http'
@@ -14,11 +14,25 @@ export function parseCookie(req: NextApiRequest) {
   return null
 }
 
-export function fetcher(url: RequestInfo, config?: RequestInit) {
-  return fetch(`/api${url}`, {
+export async function fetcher(url: RequestInfo, config?: RequestInit) {
+  const res = await fetch(`/api${url}`, {
     ...config,
     credentials: 'include',
-  }).then((res) => res.json())
+  })
+  if (res.ok) {
+    const data = await res.json()
+    return data
+  } else {
+    switch (res.status) {
+      case 404: {
+        Router.replace('/')
+        break
+      }
+      default: {
+        throw new Error()
+      }
+    }
+  }
 }
 
 export async function ssrFetch<T>(
@@ -43,4 +57,16 @@ export async function ssrFetch<T>(
     return data as T
   }
   throw new Error()
+}
+
+export class HttpError extends Error {
+  statusCode: number
+
+  message: string
+
+  constructor(statusCode?: number, message?: string) {
+    super()
+    this.statusCode = statusCode || 500
+    this.message = message || 'Something went wrong'
+  }
 }
