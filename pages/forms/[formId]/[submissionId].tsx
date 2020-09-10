@@ -1,5 +1,5 @@
 import React from 'react'
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 import {
   Heading,
   Box,
@@ -57,6 +57,7 @@ const SubmissionPage = (
         position: 'top',
         title: `Successfully deleted Submission No ${submissionId}`,
       })
+      mutate(`/forms/${data?.form.id}`)
       push(`/forms/${data?.form.id}`)
     } catch (e) {
       toast({

@@ -80,9 +80,11 @@ const Layout: React.FC = ({ children }) => {
         px={12}
         position="relative"
       >
-        <Heading fontWeight={400} fontFamily="Pacifico">
-          Formzy
-        </Heading>
+        <Link href="/forms">
+          <Heading fontWeight={400} fontFamily="Pacifico" cursor="pointer">
+            Formzy
+          </Heading>
+        </Link>
         <Flex alignItems="center">
           {user ? (
             <Avatar
