@@ -7,6 +7,7 @@ import {
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import { SWRConfig } from 'swr'
 import Layout from '../src/components/layout'
 import { fetcher } from '../src/lib/helpers'
@@ -23,6 +24,7 @@ const theme: DefaultTheme = {
 }
 
 function App(props: any) {
+  const { asPath } = useRouter()
   const { Component, pageProps } = props
   return (
     <>
@@ -36,9 +38,13 @@ function App(props: any) {
       >
         <ThemeProvider theme={theme}>
           <CSSReset />
-          <Layout>
+          {asPath.includes('thank-you') ? (
             <Component {...pageProps} />
-          </Layout>
+          ) : (
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          )}
         </ThemeProvider>
       </SWRConfig>
     </>

@@ -1,4 +1,3 @@
-import useSWR from 'swr'
 import {
   Heading,
   Box,
@@ -6,7 +5,6 @@ import {
   Grid,
   Input,
   Button,
-  useToast,
   Checkbox,
   PseudoBox,
   Avatar,
@@ -16,23 +14,30 @@ import {
   Flex,
   Text,
   Divider,
+  Textarea,
+  useToast,
 } from '@chakra-ui/core'
-import { Form, Submission, User } from '@prisma/client'
 import { useRouter } from 'next/router'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { ssrFetch, fetcher } from '../../../src/lib/helpers'
+import { ssrFetch, fetcher, redirectUser } from '../../../src/lib/helpers'
 import { useForm } from 'react-hook-form'
 import { useState, ChangeEvent } from 'react'
-
-type returnData = Form & { submissions: Submission[]; users: User[] }
+import { useUser, useFormData, FormData } from '../../../src/hooks'
+import { User } from '@prisma/client'
+import { useFormzyToast } from '../../../src/hooks/toast'
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
   params,
+  res,
 }) => {
-  if (params?.formId) {
-    const data = await ssrFetch<returnData>(`/forms/${params?.formId}`, req)
-    return { props: { data } }
+  try {
+    if (params?.formId) {
+      const data = await ssrFetch(`/forms/${params.formId}`, req)
+      return { props: { data } }
+    }
+  } catch (e) {
+    redirectUser(res)
   }
   return { props: { data: {} } }
 }
@@ -40,16 +45,16 @@ export const getServerSideProps: GetServerSideProps = async ({
 const SettingsPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
-  const [newUser, setNewUser] = useState('')
   const toast = useToast()
+  const [newUser, setNewUser] = useState('')
+  const { successToast, errorToast } = useFormzyToast()
   const { back, query, push } = useRouter()
-  const { data: currentUser } = useSWR<User>('/auth/me')
-  const { data, error, revalidate, mutate } = useSWR<returnData>(
-    `/forms/${query?.formId}`,
-    {
-      initialData: props.data,
-    }
+  const { data: currentUser } = useUser()
+  const { data, error, revalidate, mutate } = useFormData(
+    query?.formId as string,
+    props.data
   )
+
   const { register, handleSubmit } = useForm({
     defaultValues: {
       ...data,
@@ -58,31 +63,29 @@ const SettingsPage = (
 
   const onSubmit = async (values: any) => {
     try {
-      await fetcher('/forms/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      await fetcher('/forms', {
+        method: 'PATCH',
+        body: {
           formId: data?.id,
           ...values,
-        }),
+        },
       })
-      toast({ position: 'top', title: 'Success', status: 'success' })
+      successToast('Success')
       mutate({ ...data, ...values })
       revalidate()
     } catch (e) {
-      console.log(e)
+      errorToast()
     }
   }
 
   const handleDelete = async () => {
+    const formUrl = `/forms/${data?.id}`
     try {
-      await fetcher(`/forms/${data?.id}`, {
+      await fetcher(formUrl, {
         method: 'DELETE',
       })
-      toast({ position: 'top', title: 'Success', status: 'success' })
-      push(`/forms/${data?.id}`)
+      successToast()
+      push(formUrl)
     } catch (e) {
       console.log(e)
     }
@@ -92,22 +95,15 @@ const SettingsPage = (
     try {
       await fetcher('/forms/users/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ formId: data?.id, email: newUser }),
+        body: { formId: data?.id, email: newUser },
       })
-
-      toast({ position: 'top', title: 'Success' })
+      successToast()
       mutate({
-        ...(data as returnData),
-        users: [...(data?.users || []), { email: newUser } as User],
+        ...(data as FormData),
+        users: (data?.users || []).concat({ email: newUser } as User),
       })
     } catch (e) {
-      toast({
-        status: 'error',
-        title: 'No user with that email found!',
-      })
+      errorToast('No user with that email found!')
     } finally {
       setNewUser('')
     }
@@ -117,27 +113,22 @@ const SettingsPage = (
     try {
       await fetcher('/forms/users/', {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ formId: data?.id, email }),
+        body: { formId: data?.id, email },
       })
 
-      toast({ position: 'top', title: 'Success' })
+      successToast()
       mutate({
-        ...(data as returnData),
+        ...(data as FormData),
         users: [...(data?.users || [])].filter((user) => user.email !== email),
       })
     } catch (e) {
-      toast({
-        status: 'error',
-        title: 'No user with that email found!',
-      })
+      errorToast('No user with that email found!')
     }
   }
 
   if (error) return <p>Error</p>
   if (!data) return <div>loading...</div>
+
   return (
     <Box w="full" maxW="724px">
       <IconButton
@@ -186,10 +177,16 @@ const SettingsPage = (
           <Heading size="md">ID</Heading>
           <Input name="name" value={data.id} isDisabled />
           <Heading size="md">Name</Heading>
-          <Input name="name" ref={register()} />
+          <Input name="name" ref={register} />
+          <Heading size="md">Thank You Page Text:</Heading>
+          <Textarea
+            name="thankYouText"
+            ref={register}
+            isDisabled={data.hasCustomCallback}
+          />
           <Checkbox
             name="hasCustomCallback"
-            ref={register()}
+            ref={register}
             onChange={() => {
               mutate(
                 { ...data, hasCustomCallback: !data.hasCustomCallback },
@@ -203,7 +200,7 @@ const SettingsPage = (
           <Heading size="md">Callback Url:</Heading>
           <Input
             name="callbackUrl"
-            ref={register()}
+            ref={register}
             isDisabled={!data.hasCustomCallback}
           />
         </Grid>

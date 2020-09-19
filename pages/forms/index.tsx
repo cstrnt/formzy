@@ -1,17 +1,16 @@
 import Link from 'next/link'
-import useSWR, { mutate } from 'swr'
 import { Heading, Box, PseudoBox, Button } from '@chakra-ui/core'
 import { Form } from '@prisma/client'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { ssrFetch, fetcher } from '../../src/lib/helpers'
+import { ssrFetch, fetcher, redirectUser } from '../../src/lib/helpers'
+import { useForms } from '../../src/hooks'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   try {
     const data = await ssrFetch<Form[]>(`/forms`, req)
     return { props: { data } }
   } catch (e) {
-    res.writeHead(302, { Location: '/' })
-    res.end()
+    redirectUser(res)
     return { props: {} }
   }
 }
@@ -19,14 +18,12 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 const IndexPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
-  const { data, error } = useSWR<Form[]>('/forms', {
-    initialData: props.data,
-  })
+  const { data, error, mutate } = useForms(props.data)
 
   const handleCreate = async () => {
     try {
-      await fetcher('/forms/create', { method: 'POST' })
-      mutate('/forms')
+      await fetcher('/forms', { method: 'POST' })
+      mutate()
     } catch (e) {}
   }
 

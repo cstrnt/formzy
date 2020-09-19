@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
 import {
-  useToast,
   Input,
   Button,
   FormControl,
@@ -15,12 +14,13 @@ import {
 } from '@chakra-ui/core'
 
 import { GetServerSideProps } from 'next'
-import { ssrFetch } from '../src/lib/helpers'
+import { fetcher, redirectUser, ssrFetch } from '../src/lib/helpers'
 import { mutate } from 'swr'
 import Link from 'next/link'
+import { useFormzyToast } from '../src/hooks/toast'
 
 function LoginPage() {
-  const toast = useToast()
+  const { errorToast } = useFormzyToast()
   const { register, handleSubmit, errors, setValue } = useForm({
     defaultValues: {
       email: '',
@@ -30,23 +30,16 @@ function LoginPage() {
   const { push } = useRouter()
 
   const onSubmit = async (values: any) => {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetcher('/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(values),
+      body: values,
       credentials: 'include',
     })
     if (res.ok) {
       push('/forms')
       mutate('/auth/me')
     } else {
-      toast({
-        position: 'top',
-        status: 'error',
-        title: 'Something went wrong!',
-      })
+      errorToast()
       setValue('password', '')
     }
   }
@@ -109,8 +102,7 @@ function LoginPage() {
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   try {
     await ssrFetch('/auth/me', req)
-    res.writeHead(302, { Location: '/forms' })
-    res.end()
+    redirectUser(res, '/forms')
   } catch (e) {}
   return { props: {} }
 }

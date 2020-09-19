@@ -1,26 +1,26 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { parseCookie, HttpError } from '../../../src/lib/helpers'
+import { parseCookie, HttpError, handleError } from '../../../src/lib/helpers'
 import { PrismaClient } from '@prisma/client'
 import { hash } from 'bcryptjs'
+import { HTTP_METHODS } from '../../../src/lib/contants'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const client = new PrismaClient()
     const userId = parseCookie(req)
     if (!userId) {
-      throw new HttpError(404, 'Invalid cookie')
+      throw new HttpError(401, 'Invalid cookie')
     }
     switch (req.method) {
-      case 'GET': {
+      case HTTP_METHODS.GET: {
         const userData = await client.user.findOne({
           where: { id: userId },
           include: { forms: true },
         })
-        res.status(200)
         res.json(userData)
         break
       }
-      case 'PATCH': {
+      case HTTP_METHODS.PATCH: {
         const { password, ...rest } = req.body
         let hashedPassword = undefined
         if (password) {
@@ -30,7 +30,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           where: { id: userId },
           data: { hashedPassword, ...rest },
         })
-        res.status(200)
         res.json(userData)
         break
       }
@@ -38,12 +37,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     await client.$disconnect()
   } catch (e) {
-    if (e instanceof HttpError) {
-      res.status(e.statusCode)
-      res.json({ success: false, message: e.message })
-    } else {
-      res.status(500)
-      res.json({ success: false })
-    }
+    handleError(res, e)
   }
 }

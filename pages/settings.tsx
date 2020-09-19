@@ -1,4 +1,3 @@
-import useSWR from 'swr'
 import { Heading, Box, IconButton, Input, Grid, Button } from '@chakra-ui/core'
 import { Form, Submission, User } from '@prisma/client'
 import { useRouter } from 'next/router'
@@ -6,6 +5,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import { fetcher, ssrFetch } from '../src/lib/helpers'
 import { useForm } from 'react-hook-form'
 import React from 'react'
+import { useUser } from '../src/hooks'
 
 type returnData = Form & { submissions: Submission[]; users: User[] }
 
@@ -22,9 +22,7 @@ const SettingsPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
   const { back } = useRouter()
-  const { data, error, mutate } = useSWR<User>('/auth/me', {
-    initialData: props.data,
-  })
+  const { data, error, mutate } = useUser(props.data)
   const { register, handleSubmit, setValue } = useForm({
     defaultValues: {
       ...data,
@@ -49,11 +47,8 @@ const SettingsPage = (
       body = { name }
     }
     await fetcher('/auth/me', {
-      headers: {
-        'Content-Type': 'application/json',
-      },
       method: 'PATCH',
-      body: JSON.stringify(body),
+      body: body,
     })
 
     mutate({ ...data, name } as User, true)
@@ -62,6 +57,7 @@ const SettingsPage = (
 
   if (error) return <p>Error</p>
   if (!data) return <div>loading...</div>
+
   return (
     <Box w="full" maxW="724px">
       <IconButton

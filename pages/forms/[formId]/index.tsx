@@ -1,20 +1,21 @@
 import Link from 'next/link'
-import useSWR from 'swr'
 import {
   Heading,
   Box,
   Flex,
   IconButton,
-  Text,
-  PseudoBox,
+  TabList,
+  Tabs,
+  Tab,
+  TabPanels,
+  TabPanel,
 } from '@chakra-ui/core'
-import { Form, Submission } from '@prisma/client'
-import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { ssrFetch } from '../../../src/lib/helpers'
-
-type returnData = Form & { submissions: Submission[] }
+import { redirectUser, ssrFetch } from '../../../src/lib/helpers'
+import React, { useMemo } from 'react'
+import { useFormData } from '../../../src/hooks'
+import SubmissionList from '../../../src/components/SubmissionList'
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -23,12 +24,11 @@ export const getServerSideProps: GetServerSideProps = async ({
 }) => {
   try {
     if (params?.formId) {
-      const data = await ssrFetch<returnData>(`/forms/${params?.formId}`, req)
+      const data = await ssrFetch(`/forms/${params.formId}`, req)
       return { props: { data } }
     }
   } catch (e) {
-    res.writeHead(302, { Location: '/' })
-    res.end()
+    redirectUser(res)
   }
   return { props: { data: {} } }
 }
@@ -37,12 +37,20 @@ const FormsPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
   const { query, push } = useRouter()
-  const { data, error } = useSWR<returnData>(
-    query.formId ? `/forms/${query.formId}` : null,
-    { initialData: props.data }
+  const { data, error } = useFormData(query.formId as string, props.data)
+
+  const spamSubmissions = useMemo(
+    () => data?.submissions.filter((submission) => submission.isSpam) || [],
+    [data?.submissions]
   )
+  const regularSubmissions = useMemo(
+    () => data?.submissions.filter((submission) => !submission.isSpam) || [],
+    [data?.submissions]
+  )
+
   if (error) return <p>Error</p>
   if (!data) return <div>loading...</div>
+
   return (
     <Box w="full">
       <Link href="/">
@@ -69,59 +77,20 @@ const FormsPage = (
           }}
         />
       </Flex>
-
-      <Heading size="xl">Submissions</Heading>
-      {data.submissions
-        .filter((submission) => !submission.isSpam)
-        .map((submission) => (
-          <Link
-            key={submission.id}
-            href={`/forms/${submission.formId}/${submission.id}`}
-          >
-            <PseudoBox
-              py={2}
-              px={4}
-              rounded="md"
-              display="flex"
-              _hover={{ bg: 'gray.200' }}
-              cursor="pointer"
-              my={4}
-              fontSize={18}
-              justifyContent="space-between"
-              maxW="600px"
-            >
-              <Text>Submission (ID: {submission.id})</Text>
-              <Text>({dayjs(submission.createdAt).from(dayjs())})</Text>
-            </PseudoBox>
-          </Link>
-        ))}
-      <Heading size="xl" mt={8}>
-        Spam
-      </Heading>
-      {data.submissions
-        .filter((submission) => submission.isSpam)
-        .map((submission) => (
-          <Link
-            key={submission.id}
-            href={`/forms/${submission.formId}/${submission.id}`}
-          >
-            <PseudoBox
-              py={2}
-              px={4}
-              rounded="md"
-              display="flex"
-              _hover={{ bg: 'gray.200' }}
-              cursor="pointer"
-              my={4}
-              fontSize={18}
-              justifyContent="space-between"
-              maxW="600px"
-            >
-              <Text>Submission (ID: {submission.id})</Text>
-              <Text>({dayjs(submission.createdAt).from(dayjs())})</Text>
-            </PseudoBox>
-          </Link>
-        ))}
+      <Tabs variant="solid-rounded" variantColor="green">
+        <TabList>
+          <Tab>Submissions</Tab>
+          <Tab>Spam</Tab>
+        </TabList>
+        <TabPanels py={8}>
+          <TabPanel>
+            <SubmissionList submissions={regularSubmissions} />
+          </TabPanel>
+          <TabPanel>
+            <SubmissionList submissions={spamSubmissions} />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Box>
   )
 }

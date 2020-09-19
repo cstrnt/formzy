@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
-import { parseCookie } from '../../../src/lib/helpers'
+import { handleError, parseCookie } from '../../../src/lib/helpers'
+import { HTTP_METHODS } from '../../../src/lib/contants'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -11,7 +12,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       throw new Error('Invalid user or submissionId')
     }
     switch (req.method) {
-      case 'GET': {
+      case HTTP_METHODS.GET: {
         const form = await client.submission.findOne({
           where: { id },
           include: { form: true },
@@ -21,7 +22,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         res.json(form)
         break
       }
-      case 'PATCH': {
+      case HTTP_METHODS.PATCH: {
         const form = await client.submission.update({
           where: { id },
           data: { isSpam: req.body.isSpam },
@@ -30,7 +31,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         res.json(form)
         break
       }
-      case 'DELETE': {
+      case HTTP_METHODS.DELETE: {
         await client.submission.delete({
           where: { id },
         })
@@ -42,8 +43,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     await client.$disconnect()
   } catch (e) {
-    console.error(e)
-    res.status(500)
-    res.end()
+    handleError(res, e)
   }
 }

@@ -9,6 +9,11 @@
     "heroku-postbuild": "npm run build",
     "type-check": "tsc"
   },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm run type-check"
+    }
+  },
   "dependencies": {
     "@chakra-ui/core": "^0.8.0",
     "@emotion/core": "^10.0.35",
@@ -31,6 +36,7 @@
     "@types/node": "^12.12.21",
     "@types/react": "^16.9.16",
     "@types/react-dom": "^16.9.4",
+    "husky": "^4.3.0",
     "typescript": "4.0"
   },
   "license": "MIT"

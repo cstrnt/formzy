@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
 import {
-  useToast,
   Input,
   Button,
   FormControl,
@@ -11,9 +10,11 @@ import {
   Flex,
   Heading,
 } from '@chakra-ui/core'
+import { fetcher } from '../src/lib/helpers'
+import { useFormzyToast } from '../src/hooks/toast'
 
 function LoginPage() {
-  const toast = useToast()
+  const { successToast, errorToast } = useFormzyToast()
   const { register, handleSubmit, errors, setValue } = useForm({
     defaultValues: {
       email: '',
@@ -24,27 +25,16 @@ function LoginPage() {
   const { push } = useRouter()
 
   const onSubmit = async ({ name, email, password }: any) => {
-    const res = await fetch('/api/auth/register', {
+    const res = await fetcher('/auth/register', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
+      body: { name, email, password },
       credentials: 'include',
     })
     if (res.ok) {
-      toast({
-        position: 'top',
-        status: 'info',
-        title: 'Success! Please log in now.',
-      })
+      successToast('Success! Please log in now.')
       push('/')
     } else {
-      toast({
-        position: 'top',
-        status: 'error',
-        title: 'Something went wrong!',
-      })
+      errorToast()
       setValue('password', '')
     }
   }

@@ -2,17 +2,19 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
 import crypto from 'crypto'
 import dayjs from 'dayjs'
+import { handleError, HttpError, redirectUser } from '../../../src/lib/helpers'
+import { HTTP_METHODS } from '../../../src/lib/contants'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    if (req.method !== 'POST') {
-      throw new Error()
+    if (req.method !== HTTP_METHODS.POST) {
+      throw new HttpError(403, 'Invalid Method')
     }
     const { formId } = req.query
     const client = new PrismaClient()
 
     if (!formId) {
-      throw new Error()
+      throw new HttpError(403, 'Invalid Query')
     }
 
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
@@ -28,7 +30,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     const isRepeatedSubmission = submissionsByUser.some(
       (submission) =>
-        dayjs().diff(dayjs(submission.createdAt), 'second') <
+        dayjs().diff(dayjs(submission.createdAt), 'second') <=
         parseInt(process.env.SPAM_TRESHOLD as string, 10)
     )
 
@@ -46,14 +48,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     })
 
     await client.$disconnect()
-    res.writeHead(302, {
-      Location: formData.hasCustomCallback
-        ? (formData.callbackUrl as string)
-        : `${process.env.BASE_URL}/thank-you/${formData.id}`,
-    })
-    res.end()
+    redirectUser(
+      res,
+      formData.hasCustomCallback && formData.callbackUrl
+        ? formData.callbackUrl
+        : `${process.env.BASE_URL}/thank-you/${formData.id}`
+    )
   } catch (e) {
-    res.status(500)
-    res.end()
+    handleError(res, e)
   }
 }

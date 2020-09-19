@@ -1,21 +1,14 @@
-import React from 'react'
-import useSWR, { mutate } from 'swr'
-import {
-  Heading,
-  Box,
-  IconButton,
-  Grid,
-  Input,
-  Button,
-  useToast,
-} from '@chakra-ui/core'
-import { Submission, Form } from '@prisma/client'
+import React, { useMemo } from 'react'
+import { mutate } from 'swr'
+import { Heading, Box, IconButton, Grid, Input, Button } from '@chakra-ui/core'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { ssrFetch, fetcher } from '../../../src/lib/helpers'
+import { ssrFetch, fetcher, redirectUser } from '../../../src/lib/helpers'
+import { useSubmissions } from '../../../src/hooks'
+import { useFormzyToast } from '../../../src/hooks/toast'
 
-type returnData = Submission & { form: Form }
+const getSubmissionURL = (id: any) => `/submissions/${id}`
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -24,15 +17,11 @@ export const getServerSideProps: GetServerSideProps = async ({
 }) => {
   try {
     if (params?.submissionId) {
-      const data = await ssrFetch<returnData>(
-        `/submissions/${params?.submissionId}`,
-        req
-      )
+      const data = await ssrFetch(getSubmissionURL(params?.submissionId), req)
       return { props: { data } }
     }
   } catch (e) {
-    res.writeHead(302, { Location: '/' })
-    res.end()
+    redirectUser(res)
   }
   return { props: { data: {} } }
 }
@@ -40,45 +29,40 @@ export const getServerSideProps: GetServerSideProps = async ({
 const SubmissionPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
-  const toast = useToast()
+  const { errorToast, successToast } = useFormzyToast()
   const { query, push } = useRouter()
   const { submissionId } = query
-  const { data, error } = useSWR<Submission & { form: Form }>(
-    submissionId ? `/submissions/${submissionId}` : null,
-    { initialData: props.data }
-  )
+  const { data, error } = useSubmissions(submissionId, props.data)
+  const submissionUrl = useMemo(() => getSubmissionURL(submissionId), [
+    submissionId,
+  ])
+  const formUrl = useMemo(() => `/forms/${data?.formId}`, [data?.formId])
 
   const handleDelete = async () => {
     try {
-      await fetcher(`/submissions/${submissionId}`, {
+      await fetcher(submissionUrl, {
         method: 'DELETE',
       })
-      toast({
-        position: 'top',
-        title: `Successfully deleted Submission No ${submissionId}`,
-      })
-      mutate(`/forms/${data?.form.id}`)
-      push(`/forms/${data?.form.id}`)
+      successToast(`Successfully deleted Submission No ${submissionId}`)
+
+      mutate(formUrl)
+      push(formUrl)
     } catch (e) {
-      toast({
-        position: 'top',
-        status: 'error',
-        title: `Something went wrong`,
-      })
+      errorToast()
     }
   }
 
   const handleSetSpamStatus = async () => {
     try {
-      await fetcher(`/submissions/${submissionId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      await fetcher(submissionUrl, {
         method: 'PATCH',
-        body: JSON.stringify({ isSpam: !data?.isSpam }),
+        body: { isSpam: !data?.isSpam },
       })
-      mutate(`/submissions/${submissionId}`)
-    } catch (e) {}
+      mutate(submissionUrl)
+      mutate(formUrl)
+    } catch (e) {
+      errorToast()
+    }
   }
   if (error) return <p>Error</p>
   if (!data) return <div>loading...</div>
@@ -89,7 +73,7 @@ const SubmissionPage = (
         icon="arrow-back"
         variantColor="green"
         onClick={() => {
-          push(`/forms/${data.formId}`)
+          push(formUrl)
         }}
         mb={6}
       />

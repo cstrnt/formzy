@@ -1,8 +1,8 @@
-import { NextApiRequest } from 'next'
+import { NextApiRequest, NextApiResponse } from 'next'
 import Router from 'next/router'
 import { verify } from 'jsonwebtoken'
 import { User } from '@prisma/client'
-import { IncomingMessage } from 'http'
+import { IncomingMessage, ServerResponse } from 'http'
 
 export function parseCookie(req: NextApiRequest) {
   const cookies = req.headers.cookie?.split(';').map((c) => c.trim())
@@ -14,9 +14,17 @@ export function parseCookie(req: NextApiRequest) {
   return null
 }
 
-export async function fetcher(url: RequestInfo, config?: RequestInit) {
+interface CustomRequestInit extends RequestInit {
+  body?: any
+}
+
+export async function fetcher(url: RequestInfo, config?: CustomRequestInit) {
   const res = await fetch(`/api${url}`, {
     ...config,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    ...(config?.body && { body: JSON.stringify(config.body) }),
     credentials: 'include',
   })
   if (res.ok) {
@@ -65,5 +73,23 @@ export class HttpError extends Error {
     super()
     this.statusCode = statusCode || 500
     this.message = message || 'Something went wrong'
+  }
+}
+
+export function redirectUser(res: ServerResponse, url?: string) {
+  res.writeHead(302, { Location: url || '/' })
+  res.end()
+}
+
+export function handleError(res: NextApiResponse, error: any) {
+  if (process.env.NODE_ENV === 'development') {
+    console.error(error)
+  }
+  if (error instanceof HttpError) {
+    res.status(error.statusCode)
+    res.send(error.message)
+  } else {
+    res.status(500)
+    res.end()
   }
 }

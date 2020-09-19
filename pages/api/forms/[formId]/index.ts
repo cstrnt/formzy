@@ -1,6 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
-import { parseCookie } from '../../../src/lib/helpers'
+import {
+  handleError,
+  HttpError,
+  parseCookie,
+} from '../../../../src/lib/helpers'
+import { HTTP_METHODS } from '../../../../src/lib/contants'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -8,10 +13,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const client = new PrismaClient()
     const userId = parseCookie(req)
     if (!userId || !id) {
-      throw new Error('Invalid user or formId')
+      throw new HttpError(401, 'Invalid user or formId')
     }
     switch (req.method) {
-      case 'GET': {
+      case HTTP_METHODS.GET: {
         const form = await client.form.findOne({
           where: { id },
           include: {
@@ -20,25 +25,22 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           },
         })
 
-        await client.$disconnect()
         res.status(200)
         res.json(form)
         break
       }
-      case 'DELETE': {
+      case HTTP_METHODS.DELETE: {
         const form = await client.form.delete({
           where: { id },
         })
 
-        await client.$disconnect()
         res.status(200)
         res.json(form)
         break
       }
     }
+    await client.$disconnect()
   } catch (e) {
-    console.error(e)
-    res.status(500)
-    res.end()
+    handleError(res, e)
   }
 }
