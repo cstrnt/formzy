@@ -67,6 +67,19 @@ const SubmissionPage = (
       })
     }
   }
+
+  const handleSetSpamStatus = async () => {
+    try {
+      await fetcher(`/submissions/${submissionId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'PATCH',
+        body: JSON.stringify({ isSpam: !data?.isSpam }),
+      })
+      mutate(`/submissions/${submissionId}`)
+    } catch (e) {}
+  }
   if (error) return <p>Error</p>
   if (!data) return <div>loading...</div>
   return (
@@ -103,7 +116,17 @@ const SubmissionPage = (
           </React.Fragment>
         ))}
       </Grid>
-      <Button size="sm" variantColor="red" mt={8} onClick={handleDelete}>
+
+      <Button
+        size="sm"
+        variantColor={data.isSpam ? 'blue' : 'red'}
+        mt={8}
+        onClick={handleSetSpamStatus}
+      >
+        {data.isSpam ? 'No Spam' : 'Spam'}
+      </Button>
+
+      <Button ml={4} size="sm" variantColor="red" mt={8} onClick={handleDelete}>
         Delete Submission
       </Button>
     </Box>

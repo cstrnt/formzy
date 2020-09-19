@@ -14,7 +14,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       case 'GET': {
         const form = await client.form.findOne({
           where: { id },
-          include: { submissions: true, users: true },
+          include: {
+            submissions: { orderBy: { createdAt: 'desc' } },
+            users: true,
+          },
         })
 
         await client.$disconnect()

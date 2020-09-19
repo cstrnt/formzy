@@ -21,6 +21,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         res.json(form)
         break
       }
+      case 'PATCH': {
+        const form = await client.submission.update({
+          where: { id },
+          data: { isSpam: req.body.isSpam },
+        })
+        res.status(200)
+        res.json(form)
+        break
+      }
       case 'DELETE': {
         await client.submission.delete({
           where: { id },

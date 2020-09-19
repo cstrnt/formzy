@@ -5,9 +5,15 @@ import { Form } from '@prisma/client'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import { ssrFetch, fetcher } from '../../src/lib/helpers'
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const data = await ssrFetch<Form[]>(`/forms`, req)
-  return { props: { data } }
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  try {
+    const data = await ssrFetch<Form[]>(`/forms`, req)
+    return { props: { data } }
+  } catch (e) {
+    res.writeHead(302, { Location: '/' })
+    res.end()
+    return { props: {} }
+  }
 }
 
 const IndexPage = (

@@ -11,7 +11,6 @@ class MyDocument extends Document {
             as="font"
             crossOrigin=""
           />
-          <title>Formzy</title>
         </Head>
         <body>
           <Main />

@@ -6,6 +6,7 @@ import {
 } from '@chakra-ui/core'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import Head from 'next/head'
 import { SWRConfig } from 'swr'
 import Layout from '../src/components/layout'
 import { fetcher } from '../src/lib/helpers'
@@ -24,18 +25,23 @@ const theme: DefaultTheme = {
 function App(props: any) {
   const { Component, pageProps } = props
   return (
-    <SWRConfig
-      value={{
-        fetcher: fetcher,
-      }}
-    >
-      <ThemeProvider theme={theme}>
-        <CSSReset />
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </ThemeProvider>
-    </SWRConfig>
+    <>
+      <Head>
+        <title>Formzy</title>
+      </Head>
+      <SWRConfig
+        value={{
+          fetcher: fetcher,
+        }}
+      >
+        <ThemeProvider theme={theme}>
+          <CSSReset />
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </ThemeProvider>
+      </SWRConfig>
+    </>
   )
 }
 

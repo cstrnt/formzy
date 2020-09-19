@@ -71,28 +71,57 @@ const FormsPage = (
       </Flex>
 
       <Heading size="xl">Submissions</Heading>
-      {data.submissions.map((submission) => (
-        <Link
-          key={submission.id}
-          href={`/forms/${submission.formId}/${submission.id}`}
-        >
-          <PseudoBox
-            py={2}
-            px={4}
-            rounded="md"
-            display="flex"
-            _hover={{ bg: 'gray.200' }}
-            cursor="pointer"
-            my={4}
-            fontSize={18}
-            justifyContent="space-between"
-            maxW="600px"
+      {data.submissions
+        .filter((submission) => !submission.isSpam)
+        .map((submission) => (
+          <Link
+            key={submission.id}
+            href={`/forms/${submission.formId}/${submission.id}`}
           >
-            <Text>Submission (ID: {submission.id})</Text>
-            <Text>({dayjs(submission.createdAt).from(dayjs())})</Text>
-          </PseudoBox>
-        </Link>
-      ))}
+            <PseudoBox
+              py={2}
+              px={4}
+              rounded="md"
+              display="flex"
+              _hover={{ bg: 'gray.200' }}
+              cursor="pointer"
+              my={4}
+              fontSize={18}
+              justifyContent="space-between"
+              maxW="600px"
+            >
+              <Text>Submission (ID: {submission.id})</Text>
+              <Text>({dayjs(submission.createdAt).from(dayjs())})</Text>
+            </PseudoBox>
+          </Link>
+        ))}
+      <Heading size="xl" mt={8}>
+        Spam
+      </Heading>
+      {data.submissions
+        .filter((submission) => submission.isSpam)
+        .map((submission) => (
+          <Link
+            key={submission.id}
+            href={`/forms/${submission.formId}/${submission.id}`}
+          >
+            <PseudoBox
+              py={2}
+              px={4}
+              rounded="md"
+              display="flex"
+              _hover={{ bg: 'gray.200' }}
+              cursor="pointer"
+              my={4}
+              fontSize={18}
+              justifyContent="space-between"
+              maxW="600px"
+            >
+              <Text>Submission (ID: {submission.id})</Text>
+              <Text>({dayjs(submission.createdAt).from(dayjs())})</Text>
+            </PseudoBox>
+          </Link>
+        ))}
     </Box>
   )
 }

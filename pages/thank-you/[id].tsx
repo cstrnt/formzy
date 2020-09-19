@@ -26,10 +26,9 @@ const ThankYouPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
   const { query } = useRouter()
-  const { data, error } = useSWR<Form>(
-    query.id ? `/submissions/${query.id}` : null,
-    { initialData: props.data }
-  )
+  const { data, error } = useSWR<Form>(query.id ? `/forms/${query.id}` : null, {
+    initialData: props.data,
+  })
   if (error) return <p>Error</p>
   if (!data) return <p>Loading...</p>
   return (

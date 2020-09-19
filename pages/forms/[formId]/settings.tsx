@@ -167,7 +167,7 @@ const SettingsPage = (
                 title: 'Successfully copied the URL to the clipboard',
               })
               navigator.clipboard.writeText(
-                `http://${process.env.BASE_URL}/api/f/${data.id}`
+                `${process.env.BASE_URL}/api/f/${data.id}`
               )
             }}
           >
