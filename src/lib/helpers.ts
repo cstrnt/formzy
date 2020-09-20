@@ -58,6 +58,7 @@ export async function ssrFetch<T>(
     method: 'GET',
   }
   const BASE_URL = getConfig().publicRuntimeConfig.BASE_URL
+  console.log(BASE_URL)
   const response = await fetch(`${BASE_URL}/api${endpoint}`, config)
   if (response.ok) {
     const data = await response.json()
