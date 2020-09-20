@@ -2,10 +2,14 @@ import { Heading, Box, IconButton, Input, Grid, Button } from '@chakra-ui/core'
 import { Form, Submission, User } from '@prisma/client'
 import { useRouter } from 'next/router'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { fetcher, ssrFetch } from '../src/lib/helpers'
+import { ssrFetch } from '../src/lib/helpers'
 import { useForm } from 'react-hook-form'
 import React from 'react'
 import { useUser } from '../src/hooks'
+import { updateProfile } from '../src/lib/auth'
+import { useFormzyToast } from '../src/hooks/toast'
+import ErrorComponent from '../src/components/Error'
+import Loading from '../src/components/Loading'
 
 type returnData = Form & { submissions: Submission[]; users: User[] }
 
@@ -21,6 +25,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 const SettingsPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
+  const { errorToast, successToast } = useFormzyToast()
   const { back } = useRouter()
   const { data, error, mutate } = useUser(props.data)
   const { register, handleSubmit, setValue } = useForm({
@@ -46,17 +51,18 @@ const SettingsPage = (
     } else {
       body = { name }
     }
-    await fetcher('/auth/me', {
-      method: 'PATCH',
-      body: body,
-    })
-
-    mutate({ ...data, name } as User, true)
-    setValue('name', name)
+    try {
+      await updateProfile(body)
+      mutate({ ...data, name } as User, true)
+      setValue('name', name)
+      successToast()
+    } catch (e) {
+      errorToast()
+    }
   }
 
-  if (error) return <p>Error</p>
-  if (!data) return <div>loading...</div>
+  if (error) return <ErrorComponent />
+  if (!data) return <Loading />
 
   return (
     <Box w="full" maxW="724px">

@@ -4,11 +4,17 @@ import { Heading, Box, IconButton, Grid, Input, Button } from '@chakra-ui/core'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { ssrFetch, fetcher, redirectUser } from '../../../src/lib/helpers'
+import { ssrFetch, redirectUser } from '../../../src/lib/helpers'
 import { useSubmissions } from '../../../src/hooks'
 import { useFormzyToast } from '../../../src/hooks/toast'
-
-const getSubmissionURL = (id: any) => `/submissions/${id}`
+import {
+  deleteSubmission,
+  getSubmissionURL,
+  setSpamStatus,
+} from '../../../src/lib/submission'
+import { getFormUrl } from '../../../src/lib/form'
+import ErrorComponent from '../../../src/components/Error'
+import Loading from '../../../src/components/Loading'
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -36,15 +42,12 @@ const SubmissionPage = (
   const submissionUrl = useMemo(() => getSubmissionURL(submissionId), [
     submissionId,
   ])
-  const formUrl = useMemo(() => `/forms/${data?.formId}`, [data?.formId])
+  const formUrl = useMemo(() => getFormUrl(data?.formId), [data?.formId])
 
   const handleDelete = async () => {
     try {
-      await fetcher(submissionUrl, {
-        method: 'DELETE',
-      })
+      await deleteSubmission(submissionId as string)
       successToast(`Successfully deleted Submission No ${submissionId}`)
-
       mutate(formUrl)
       push(formUrl)
     } catch (e) {
@@ -54,18 +57,17 @@ const SubmissionPage = (
 
   const handleSetSpamStatus = async () => {
     try {
-      await fetcher(submissionUrl, {
-        method: 'PATCH',
-        body: { isSpam: !data?.isSpam },
-      })
+      await setSpamStatus(submissionId as string, !data?.isSpam)
       mutate(submissionUrl)
       mutate(formUrl)
     } catch (e) {
       errorToast()
     }
   }
-  if (error) return <p>Error</p>
-  if (!data) return <div>loading...</div>
+
+  if (error) return <ErrorComponent />
+  if (!data) return <Loading />
+
   return (
     <Box>
       <IconButton

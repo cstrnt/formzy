@@ -16,6 +16,8 @@ import { redirectUser, ssrFetch } from '../../../src/lib/helpers'
 import React, { useMemo } from 'react'
 import { useFormData } from '../../../src/hooks'
 import SubmissionList from '../../../src/components/SubmissionList'
+import Loading from '../../../src/components/Loading'
+import ErrorComponent from '../../../src/components/Error'
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -48,8 +50,8 @@ const FormsPage = (
     [data?.submissions]
   )
 
-  if (error) return <p>Error</p>
-  if (!data) return <div>loading...</div>
+  if (error) return <ErrorComponent />
+  if (!data) return <Loading />
 
   return (
     <Box w="full">

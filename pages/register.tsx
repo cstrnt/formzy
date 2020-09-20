@@ -10,30 +10,28 @@ import {
   Flex,
   Heading,
 } from '@chakra-ui/core'
-import { fetcher } from '../src/lib/helpers'
 import { useFormzyToast } from '../src/hooks/toast'
+import { signup } from '../src/lib/auth'
+
+export type RegisterFormValues = {
+  email: string
+  password: string
+  name: string
+}
 
 function LoginPage() {
   const { successToast, errorToast } = useFormzyToast()
-  const { register, handleSubmit, errors, setValue } = useForm({
-    defaultValues: {
-      email: '',
-      password: '',
-      name: '',
-    },
-  })
+  const { register, handleSubmit, errors, setValue } = useForm<
+    RegisterFormValues
+  >()
   const { push } = useRouter()
 
-  const onSubmit = async ({ name, email, password }: any) => {
-    const res = await fetcher('/auth/register', {
-      method: 'POST',
-      body: { name, email, password },
-      credentials: 'include',
-    })
-    if (res.ok) {
+  const onSubmit = async (values: RegisterFormValues) => {
+    try {
+      await signup(values)
       successToast('Success! Please log in now.')
       push('/')
-    } else {
+    } catch (e) {
       errorToast()
       setValue('password', '')
     }

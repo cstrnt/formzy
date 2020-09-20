@@ -2,8 +2,11 @@ import Link from 'next/link'
 import { Heading, Box, PseudoBox, Button } from '@chakra-ui/core'
 import { Form } from '@prisma/client'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { ssrFetch, fetcher, redirectUser } from '../../src/lib/helpers'
+import { ssrFetch, redirectUser } from '../../src/lib/helpers'
 import { useForms } from '../../src/hooks'
+import { createForm, getFormUrl } from '../../src/lib/form'
+import ErrorComponent from '../../src/components/Error'
+import Loading from '../../src/components/Loading'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   try {
@@ -22,21 +25,21 @@ const IndexPage = (
 
   const handleCreate = async () => {
     try {
-      await fetcher('/forms', { method: 'POST' })
+      await createForm()
       mutate()
     } catch (e) {}
   }
 
-  if (error) return <p>Error</p>
-  if (!data) return <div>loading...</div>
+  if (error) return <ErrorComponent />
+  if (!data) return <Loading />
 
   return (
     <Box w="full">
       <Heading fontWeight="bold" size="2xl">
         Your Forms:
       </Heading>
-      {data.map((form: Form) => (
-        <Link key={form.id} href={`/forms/${form.id}`}>
+      {data.map((form) => (
+        <Link key={form.id} href={getFormUrl(form.id)}>
           <PseudoBox
             py={2}
             px={4}

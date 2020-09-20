@@ -19,12 +19,20 @@ import {
 } from '@chakra-ui/core'
 import { useRouter } from 'next/router'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { ssrFetch, fetcher, redirectUser } from '../../../src/lib/helpers'
+import { ssrFetch, redirectUser } from '../../../src/lib/helpers'
 import { useForm } from 'react-hook-form'
 import { useState, ChangeEvent } from 'react'
 import { useUser, useFormData, FormData } from '../../../src/hooks'
 import { User } from '@prisma/client'
 import { useFormzyToast } from '../../../src/hooks/toast'
+import {
+  addUserToForm,
+  deleteForm,
+  removeUserFromForm,
+  updateForm,
+} from '../../../src/lib/form'
+import ErrorComponent from '../../../src/components/Error'
+import Loading from '../../../src/components/Loading'
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -63,45 +71,39 @@ const SettingsPage = (
 
   const onSubmit = async (values: any) => {
     try {
-      await fetcher('/forms', {
-        method: 'PATCH',
-        body: {
-          formId: data?.id,
-          ...values,
-        },
-      })
-      successToast('Success')
-      mutate({ ...data, ...values })
-      revalidate()
+      if (data?.id) {
+        await updateForm(data.id, values)
+        successToast('Success')
+        mutate({ ...data, ...values })
+        revalidate()
+      }
     } catch (e) {
       errorToast()
     }
   }
 
   const handleDelete = async () => {
-    const formUrl = `/forms/${data?.id}`
     try {
-      await fetcher(formUrl, {
-        method: 'DELETE',
-      })
-      successToast()
-      push(formUrl)
+      if (data) {
+        deleteForm(data.id)
+        successToast()
+        push(`/forms/${data?.id}`)
+      }
     } catch (e) {
-      console.log(e)
+      errorToast()
     }
   }
 
   const handleAdd = async () => {
     try {
-      await fetcher('/forms/users/', {
-        method: 'POST',
-        body: { formId: data?.id, email: newUser },
-      })
-      successToast()
-      mutate({
-        ...(data as FormData),
-        users: (data?.users || []).concat({ email: newUser } as User),
-      })
+      if (data) {
+        await addUserToForm(data.id, newUser)
+        successToast()
+        mutate({
+          ...(data as FormData),
+          users: (data?.users || []).concat({ email: newUser } as User),
+        })
+      }
     } catch (e) {
       errorToast('No user with that email found!')
     } finally {
@@ -111,23 +113,23 @@ const SettingsPage = (
 
   const handleRemove = async (email: string) => {
     try {
-      await fetcher('/forms/users/', {
-        method: 'DELETE',
-        body: { formId: data?.id, email },
-      })
-
-      successToast()
-      mutate({
-        ...(data as FormData),
-        users: [...(data?.users || [])].filter((user) => user.email !== email),
-      })
+      if (data) {
+        await removeUserFromForm(data.id, email)
+        successToast()
+        mutate({
+          ...(data as FormData),
+          users: [...(data?.users || [])].filter(
+            (user) => user.email !== email
+          ),
+        })
+      }
     } catch (e) {
       errorToast('No user with that email found!')
     }
   }
 
-  if (error) return <p>Error</p>
-  if (!data) return <div>loading...</div>
+  if (error) return <ErrorComponent />
+  if (!data) return <Loading />
 
   return (
     <Box w="full" maxW="724px">

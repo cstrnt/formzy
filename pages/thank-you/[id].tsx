@@ -4,6 +4,8 @@ import { Form } from '@prisma/client'
 import { redirectUser, ssrFetch } from '../../src/lib/helpers'
 import useSWR from 'swr'
 import { useRouter } from 'next/router'
+import ErrorComponent from '../../src/components/Error'
+import Loading from '../../src/components/Loading'
 
 const getThankYouUrl = (id: any) => `/forms/${id}/thanks`
 
@@ -34,8 +36,8 @@ const ThankYouPage = (
     }
   )
 
-  if (error) return <p>Error</p>
-  if (!data) return <p>Loading...</p>
+  if (error) return <ErrorComponent />
+  if (!data) return <Loading />
 
   return (
     <Flex

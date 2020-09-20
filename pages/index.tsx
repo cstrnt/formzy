@@ -14,31 +14,28 @@ import {
 } from '@chakra-ui/core'
 
 import { GetServerSideProps } from 'next'
-import { fetcher, redirectUser, ssrFetch } from '../src/lib/helpers'
+import { redirectUser, ssrFetch } from '../src/lib/helpers'
 import { mutate } from 'swr'
 import Link from 'next/link'
 import { useFormzyToast } from '../src/hooks/toast'
+import { login } from '../src/lib/auth'
+
+type FormValues = {
+  email: string
+  password: string
+}
 
 function LoginPage() {
   const { errorToast } = useFormzyToast()
-  const { register, handleSubmit, errors, setValue } = useForm({
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  })
+  const { register, handleSubmit, errors, setValue } = useForm<FormValues>()
   const { push } = useRouter()
 
-  const onSubmit = async (values: any) => {
-    const res = await fetcher('/auth/login', {
-      method: 'POST',
-      body: values,
-      credentials: 'include',
-    })
-    if (res.ok) {
+  const onSubmit = async (values: FormValues) => {
+    try {
+      await login(values)
       push('/forms')
       mutate('/auth/me')
-    } else {
+    } catch (e) {
       errorToast()
       setValue('password', '')
     }
