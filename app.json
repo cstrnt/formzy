@@ -2,7 +2,7 @@
   "name": "Formzy - Form Submissions Made Easy",
   "description": "Formzy is a tool to get form submissions from any site",
   "repository": "https://github.com/cstrnt/formzy",
-  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "logo": "https://raw.githubusercontent.com/cstrnt/formzy/master/logo.png",
   "addons": [
     {
       "plan": "heroku-postgresql"
