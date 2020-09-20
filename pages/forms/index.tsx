@@ -7,6 +7,7 @@ import { useForms } from '../../src/hooks'
 import { createForm, getFormUrl } from '../../src/lib/form'
 import ErrorComponent from '../../src/components/Error'
 import Loading from '../../src/components/Loading'
+import { useFormzyToast } from '../../src/hooks/toast'
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   try {
@@ -22,12 +23,16 @@ const IndexPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
   const { data, error, mutate } = useForms(props.data)
+  const { errorToast, successToast } = useFormzyToast()
 
   const handleCreate = async () => {
     try {
       await createForm()
       mutate()
-    } catch (e) {}
+      successToast('Your Form has been created successfully')
+    } catch (e) {
+      errorToast()
+    }
   }
 
   if (error) return <ErrorComponent />

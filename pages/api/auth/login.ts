@@ -34,8 +34,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       )}; Path=/`
     )
     await client.$disconnect()
-    res.status(200)
-    res.end()
+    res.json({})
   } catch (e) {
     handleError(res, e)
   }

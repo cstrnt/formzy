@@ -7,11 +7,10 @@ import {
   useDisclosure,
   PseudoBox,
 } from '@chakra-ui/core'
-import useSWR from 'swr'
-import { User } from '@prisma/client'
 import Link from 'next/link'
 import { fetcher } from '../lib/helpers'
 import { useRouter } from 'next/router'
+import { useUser } from '../hooks'
 
 interface DropDownProps {
   handleClose: () => Promise<void>
@@ -68,7 +67,8 @@ const AvatarDropDown = ({ handleClose }: DropDownProps) => {
 
 const Layout: React.FC = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { data: user, mutate } = useSWR<User | null>('/auth/me')
+  const { data: user, mutate } = useUser()
+
   return (
     <Flex direction="column" minH="100vh" onClick={onClose}>
       <Flex

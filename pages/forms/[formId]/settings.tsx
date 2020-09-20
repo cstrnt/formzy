@@ -259,7 +259,15 @@ const SettingsPage = (
         />
         <InputRightElement
           width="auto"
-          children={<Button variantColor="blue">Add User</Button>}
+          children={
+            <Button
+              variantColor="blue"
+              borderTopLeftRadius={0}
+              borderBottomLeftRadius={0}
+            >
+              Add User
+            </Button>
+          }
           onClick={handleAdd}
         />
       </InputGroup>
