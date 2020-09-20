@@ -1,5 +1,6 @@
 import { Form, Submission, User } from '@prisma/client'
 import useSWR from 'swr'
+import { getFormUrl } from '../lib/form'
 
 export function useUser(initialData?: User) {
   return useSWR<User | null>('/auth/me', { initialData })
@@ -8,7 +9,7 @@ export function useUser(initialData?: User) {
 export type FormData = Form & { submissions: Submission[]; users: User[] }
 
 export function useFormData(formId: string, initialData?: FormData) {
-  return useSWR<FormData>(formId ? `/forms/${formId}` : null, { initialData })
+  return useSWR<FormData>(formId ? getFormUrl(formId) : null, { initialData })
 }
 
 export function useForms(initialData: Form[]) {

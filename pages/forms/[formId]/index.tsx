@@ -13,11 +13,11 @@ import {
 import { useRouter } from 'next/router'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import { redirectUser, ssrFetch } from '../../../src/lib/helpers'
-import React, { useMemo } from 'react'
 import { useFormData } from '../../../src/hooks'
 import SubmissionList from '../../../src/components/SubmissionList'
 import Loading from '../../../src/components/Loading'
 import ErrorComponent from '../../../src/components/Error'
+import { getFormUrl } from '../../../src/lib/form'
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -26,7 +26,7 @@ export const getServerSideProps: GetServerSideProps = async ({
 }) => {
   try {
     if (params?.formId) {
-      const data = await ssrFetch(`/forms/${params.formId}`, req)
+      const data = await ssrFetch(getFormUrl(params.formId), req)
       return { props: { data } }
     }
   } catch (e) {
@@ -41,14 +41,11 @@ const FormsPage = (
   const { query, push } = useRouter()
   const { data, error } = useFormData(query.formId as string, props.data)
 
-  const spamSubmissions = useMemo(
-    () => data?.submissions.filter((submission) => submission.isSpam) || [],
-    [data?.submissions]
-  )
-  const regularSubmissions = useMemo(
-    () => data?.submissions.filter((submission) => !submission.isSpam) || [],
-    [data?.submissions]
-  )
+  const spamSubmissions =
+    data?.submissions.filter((submission) => submission.isSpam) || []
+
+  const regularSubmissions =
+    data?.submissions.filter((submission) => !submission.isSpam) || []
 
   if (error) return <ErrorComponent />
   if (!data) return <Loading />
