@@ -4,9 +4,9 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "prebuild": "prisma migrate up --experimental",
+    "migrate": "prisma migrate up --experimental",
     "start": "next start -p $PORT",
-    "heroku-postbuild": "npm run build",
+    "heroku-postbuild": "npm run migrate && npm run build",
     "type-check": "tsc"
   },
   "husky": {
