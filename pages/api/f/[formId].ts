@@ -1,9 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next'
+import getConfig from 'next/config'
 import { PrismaClient } from '@prisma/client'
 import crypto from 'crypto'
 import dayjs from 'dayjs'
 import { handleError, HttpError, redirectUser } from '../../../src/lib/helpers'
 import { HTTP_METHODS } from '../../../src/lib/contants'
+
+const BASE_URL = getConfig().publicRuntimeConfig.BASE_URL
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -31,7 +34,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const isRepeatedSubmission = submissionsByUser.some(
       (submission) =>
         dayjs().diff(dayjs(submission.createdAt), 'second') <=
-        parseInt(process.env.SPAM_TRESHOLD as string, 10)
+        parseInt(getConfig().publicRuntimeConfig.SPAM_TRESHOLD, 10)
     )
 
     const formData = await client.form.update({
@@ -52,7 +55,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       res,
       formData.hasCustomCallback && formData.callbackUrl
         ? formData.callbackUrl
-        : `${process.env.BASE_URL}/thank-you/${formData.id}`
+        : `${BASE_URL}/thank-you/${formData.id}`
     )
   } catch (e) {
     handleError(res, e)

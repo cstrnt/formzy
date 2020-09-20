@@ -18,6 +18,7 @@ import {
   useToast,
 } from '@chakra-ui/core'
 import { useRouter } from 'next/router'
+import getConfig from 'next/config'
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
 import { ssrFetch, redirectUser } from '../../../src/lib/helpers'
 import { useForm } from 'react-hook-form'
@@ -33,6 +34,8 @@ import {
 } from '../../../src/lib/form'
 import ErrorComponent from '../../../src/components/Error'
 import Loading from '../../../src/components/Loading'
+
+const BASE_URL = getConfig().publicRuntimeConfig.BASE_URL
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -159,12 +162,10 @@ const SettingsPage = (
                 position: 'bottom-right',
                 title: 'Successfully copied the URL to the clipboard',
               })
-              navigator.clipboard.writeText(
-                `${process.env.BASE_URL}/api/f/${data.id}`
-              )
+              navigator.clipboard.writeText(`${BASE_URL}/api/f/${data.id}`)
             }}
           >
-            {process.env.BASE_URL}/api/f/{data.id}
+            {BASE_URL}/api/f/{data.id}
           </Box>
         </Heading>
       </Box>

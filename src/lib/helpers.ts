@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
+import getConfig from 'next/config'
 import Router from 'next/router'
 import { verify } from 'jsonwebtoken'
 import { User } from '@prisma/client'
@@ -56,7 +57,8 @@ export async function ssrFetch<T>(
     },
     method: 'GET',
   }
-  const response = await fetch(`${process.env.BASE_URL}/api${endpoint}`, config)
+  const BASE_URL = getConfig().publicRuntimeConfig.BASE_URL
+  const response = await fetch(`${BASE_URL}/api${endpoint}`, config)
   if (response.ok) {
     const data = await response.json()
     return data as T
