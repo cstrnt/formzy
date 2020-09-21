@@ -1,7 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Form, PrismaClient } from '@prisma/client'
+import * as yup from 'yup'
 import { handleError, HttpError, parseCookie } from '../../../src/lib/helpers'
 import { HTTP_METHODS } from '../../../src/lib/contants'
+
+const urlValidator = yup.string().url()
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -38,6 +41,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           hasCustomCallback,
           thankYouText,
         } = req.body as Form & { formId: number }
+        if (hasCustomCallback && !callbackUrl) {
+          throw new HttpError(500)
+        }
+
+        if (hasCustomCallback && callbackUrl) {
+          await urlValidator.validate(callbackUrl)
+        }
         await client.form.update({
           where: { id: formId },
           data: { name, callbackUrl, hasCustomCallback, thankYouText },

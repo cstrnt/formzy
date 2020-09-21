@@ -36,6 +36,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         dayjs().diff(dayjs(submission.createdAt), 'second') <=
         parseInt(getConfig().publicRuntimeConfig.SPAM_TRESHOLD, 10)
     )
+    const blacklistedUsers = await client.form.findOne({
+      where: { id: Number(formId) },
+      select: { blacklistedUsers: { where: { id: uniqueIPID } } },
+    })
+
+    if (blacklistedUsers?.blacklistedUsers.length !== 0) {
+      throw new HttpError(403, 'Unauthorized')
+    }
 
     const formData = await client.form.update({
       where: { id: Number(formId) },
@@ -43,7 +51,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         submissions: {
           create: {
             content: req.body,
-            submittedBy: uniqueIPID,
+            submitter: {
+              connectOrCreate: {
+                create: { id: uniqueIPID },
+                where: { id: uniqueIPID },
+              },
+            },
             isSpam: isRepeatedSubmission,
           },
         },

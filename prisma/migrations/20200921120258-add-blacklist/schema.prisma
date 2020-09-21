@@ -1,11 +1,10 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["connectOrCreate"]
+  provider = "prisma-client-js"
 }
 
 model Form {
@@ -17,7 +16,7 @@ model Form {
   hasCustomCallback Boolean @default(false)
   adminId           Int
   thankYouText      String? 
-  blacklistedUsers  BlacklistUser[]
+  blacklistedUsers  String[]
 }
 
 model Submission {
@@ -27,7 +26,6 @@ model Submission {
   form          Form      @relation(fields: [formId], references: [id])
   formId        Int
   submittedBy   String
-  submitter     BlacklistUser @relation(fields: [submittedBy], references: [id])
   isSpam        Boolean   @default(false)
 }
 
@@ -37,8 +35,4 @@ model User {
   name              String?
   hashedPassword    String
   forms             Form[]
-}
-
-model BlacklistUser {
-  id                String @unique
 }

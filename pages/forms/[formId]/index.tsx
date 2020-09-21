@@ -39,8 +39,7 @@ const FormsPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) => {
   const { query, push } = useRouter()
-  const { data, error } = useFormData(query.formId as string, props.data)
-
+  const { data, error } = useFormData(query.formId as string, props.data, 5000)
   const spamSubmissions =
     data?.submissions.filter((submission) => submission.isSpam) || []
 

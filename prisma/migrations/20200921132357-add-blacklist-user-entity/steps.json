@@ -1,0 +1,79 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateModel",
+      "model": "BlacklistUser"
+    },
+    {
+      "tag": "CreateField",
+      "model": "BlacklistUser",
+      "field": "id",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "BlacklistUser",
+          "field": "id"
+        },
+        "directive": "unique"
+      }
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Form",
+      "field": "blacklistedUsers",
+      "type": "BlacklistUser"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Submission",
+      "field": "submitter",
+      "type": "BlacklistUser",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Submission",
+          "field": "submitter"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Submission",
+          "field": "submitter"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[submittedBy]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Submission",
+          "field": "submitter"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[id]"
+    }
+  ]
+}

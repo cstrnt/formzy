@@ -13,22 +13,22 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     }
     switch (req.method) {
       case HTTP_METHODS.GET: {
-        const form = await client.submission.findOne({
+        const submission = await client.submission.findOne({
           where: { id },
-          include: { form: true },
+          include: {
+            form: { include: { blacklistedUsers: true } },
+            submitter: true,
+          },
         })
-
-        res.status(200)
-        res.json(form)
+        res.json(submission)
         break
       }
       case HTTP_METHODS.PATCH: {
-        const form = await client.submission.update({
+        const submission = await client.submission.update({
           where: { id },
           data: { isSpam: req.body.isSpam },
         })
-        res.status(200)
-        res.json(form)
+        res.json(submission)
         break
       }
       case HTTP_METHODS.DELETE: {
@@ -36,7 +36,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           where: { id },
         })
         res.json({ success: true })
-        res.end()
         break
       }
     }

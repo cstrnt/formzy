@@ -30,6 +30,7 @@ function App(props: any) {
     <>
       <Head>
         <title>Formzy</title>
+        <link rel="shortcut icon" href="/favicon.ico" />
       </Head>
       <SWRConfig
         value={{

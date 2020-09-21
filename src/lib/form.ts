@@ -38,3 +38,17 @@ export function removeUserFromForm(formId: number, email: string) {
     body: { formId, email },
   })
 }
+
+export function addUserToBlackList(formId: number, submitterId: string) {
+  return fetcher(`/forms/${formId}/blacklist`, {
+    method: HTTP_METHODS.POST,
+    body: { submitterId },
+  })
+}
+
+export function removeUserFromBlackList(formId: number, submitterId: string) {
+  return fetcher(`/forms/${formId}/blacklist`, {
+    method: HTTP_METHODS.DELETE,
+    body: { submitterId },
+  })
+}

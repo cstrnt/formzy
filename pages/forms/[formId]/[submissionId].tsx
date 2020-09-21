@@ -12,7 +12,7 @@ import {
   getSubmissionURL,
   setSpamStatus,
 } from '../../../src/lib/submission'
-import { getFormUrl } from '../../../src/lib/form'
+import { addUserToBlackList, getFormUrl } from '../../../src/lib/form'
 import ErrorComponent from '../../../src/components/Error'
 import Loading from '../../../src/components/Loading'
 
@@ -65,6 +65,18 @@ const SubmissionPage = (
     }
   }
 
+  const handleAddToBlacklist = async () => {
+    try {
+      if (data) {
+        await addUserToBlackList(data.formId, data.submitter.id)
+        mutate(submissionUrl)
+        mutate(formUrl)
+      }
+    } catch (e) {
+      errorToast()
+    }
+  }
+
   if (error) return <ErrorComponent />
   if (!data) return <Loading />
 
@@ -86,7 +98,8 @@ const SubmissionPage = (
 
       <Heading size="sm" fontWeight={400} color="gray.700">
         Submitted on {dayjs(data.createdAt).format('DD-MM-YYYY, hh:mm A')} (
-        {dayjs(data.createdAt).from(dayjs())})
+        {dayjs(data.createdAt).from(dayjs())}) | Submitted by:{' '}
+        <i>{data.submittedBy}</i>
       </Heading>
       <Heading mt={6}>Submitted Fields:</Heading>
       <Grid
@@ -109,7 +122,20 @@ const SubmissionPage = (
         mt={8}
         onClick={handleSetSpamStatus}
       >
-        {data.isSpam ? 'No Spam' : 'Spam'}
+        Set as {data.isSpam ? 'No Spam' : 'Spam'}
+      </Button>
+
+      <Button
+        size="sm"
+        variantColor="red"
+        isDisabled={data.form.blacklistedUsers.some(
+          (user) => user.id === data.submitter.id
+        )}
+        mt={8}
+        ml={4}
+        onClick={handleAddToBlacklist}
+      >
+        Add Submitter to Blacklist
       </Button>
 
       <Button ml={4} size="sm" variantColor="red" mt={8} onClick={handleDelete}>

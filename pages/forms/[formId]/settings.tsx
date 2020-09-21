@@ -29,6 +29,7 @@ import { useFormzyToast } from '../../../src/hooks/toast'
 import {
   addUserToForm,
   deleteForm,
+  removeUserFromBlackList,
   removeUserFromForm,
   updateForm,
 } from '../../../src/lib/form'
@@ -131,6 +132,18 @@ const SettingsPage = (
     }
   }
 
+  const handleRemoveFromBlacklist = async (id: string) => {
+    try {
+      if (data) {
+        await removeUserFromBlackList(data.id, id)
+        successToast()
+        mutate()
+      }
+    } catch (e) {
+      errorToast('Unable to remove user from blacklist!')
+    }
+  }
+
   if (error) return <ErrorComponent />
   if (!data) return <Loading />
 
@@ -204,6 +217,7 @@ const SettingsPage = (
           <Input
             name="callbackUrl"
             ref={register}
+            type="url"
             isDisabled={!data.hasCustomCallback}
           />
         </Grid>
@@ -272,6 +286,37 @@ const SettingsPage = (
           onClick={handleAdd}
         />
       </InputGroup>
+      <Divider borderColor="gray.400" my={12} />
+      <Heading mb={2}>Blacklisted Submitters</Heading>
+      <Heading mb={6} size="sm" fontWeight="normal" color="gray.600">
+        Blacklisted Users are prevented from submitting.
+      </Heading>
+      {data.blacklistedUsers.map((user) => (
+        <PseudoBox
+          key={user.id}
+          py={2}
+          px={3}
+          rounded="md"
+          display="flex"
+          cursor="pointer"
+          my={2}
+          fontSize={18}
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Flex alignItems="center">
+            <Heading size="xs">{user.id}</Heading>
+          </Flex>
+          <Link
+            color="red.500"
+            fontWeight="bold"
+            fontSize={14}
+            onClick={() => handleRemoveFromBlacklist(user.id)}
+          >
+            remove
+          </Link>
+        </PseudoBox>
+      ))}
 
       <Button variantColor="red" onClick={handleDelete} mt={16}>
         Delete Form
