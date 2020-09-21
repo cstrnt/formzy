@@ -2,10 +2,6 @@
 
 # Form Submissions Made Easy
 
-## Motivation
-
-I personally never knew what I should do with form submissions. It was quite obvious in the PHP days but I always struggled to find an easy to use solution in the modern JS world. Therefore I create **Formzy** which makes Form Submissions so easy that you never have to worry about it ever again.
-
 ## Usage
 
 After you created a Form in the UI you will get unique URL where you can submit your Forms to. You can either add it to a plain form like this
@@ -49,3 +45,16 @@ e.g.
 `https://formzy-demo.herokuapp.com`
 
 Your app will then reload and you are good to go!
+
+## Motivation
+
+I personally never knew what I should do with form submissions. It was quite obvious in the PHP days but I always struggled to find an easy to use solution in the modern JS world. Therefore I create **Formzy** which makes Form Submissions so easy that you never have to worry about it ever again.
+
+## Features
+
+- Form Submissions using fetch
+- Form Submissions using <form>
+- Multi-User Access
+- Spam detection
+- Blacklisting
+- GDPR compliant
