@@ -52,8 +52,8 @@ I personally never knew what I should do with form submissions. It was quite obv
 
 ## Features
 
-- Form Submissions using fetch
-- Form Submissions using <form>
+- Form Submissions using `fetch`
+- Form Submissions using `<form>`
 - Multi-User Access
 - Spam detection
 - Blacklisting
