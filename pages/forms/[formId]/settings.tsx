@@ -29,7 +29,7 @@ import { useFormzyToast } from '../../../src/hooks/toast'
 import {
   addUserToForm,
   deleteForm,
-  removeUserFromBlackList,
+  removeUserFromDenyList,
   removeUserFromForm,
   updateForm,
 } from '../../../src/lib/form'
@@ -132,15 +132,15 @@ const SettingsPage = (
     }
   }
 
-  const handleRemoveFromBlacklist = async (id: string) => {
+  const handleRemoveFromDenylist = async (id: string) => {
     try {
       if (data) {
-        await removeUserFromBlackList(data.id, id)
+        await removeUserFromDenyList(data.id, id)
         successToast()
         mutate()
       }
     } catch (e) {
-      errorToast('Unable to remove user from blacklist!')
+      errorToast('Unable to remove user from denylist!')
     }
   }
 
@@ -287,11 +287,11 @@ const SettingsPage = (
         />
       </InputGroup>
       <Divider borderColor="gray.400" my={12} />
-      <Heading mb={2}>Blacklisted Submitters</Heading>
+      <Heading mb={2}>Denylisted Submitters</Heading>
       <Heading mb={6} size="sm" fontWeight="normal" color="gray.600">
-        Blacklisted Users are prevented from submitting.
+        Denylisted Users are prevented from submitting.
       </Heading>
-      {data.blacklistedUsers.map((user) => (
+      {data.denylistedUsers.map((user) => (
         <PseudoBox
           key={user.id}
           py={2}
@@ -311,7 +311,7 @@ const SettingsPage = (
             color="red.500"
             fontWeight="bold"
             fontSize={14}
-            onClick={() => handleRemoveFromBlacklist(user.id)}
+            onClick={() => handleRemoveFromDenylist(user.id)}
           >
             remove
           </Link>

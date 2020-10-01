@@ -12,7 +12,7 @@ import {
   getSubmissionURL,
   setSpamStatus,
 } from '../../../src/lib/submission'
-import { addUserToBlackList, getFormUrl } from '../../../src/lib/form'
+import { addUserToDenyList, getFormUrl } from '../../../src/lib/form'
 import ErrorComponent from '../../../src/components/Error'
 import Loading from '../../../src/components/Loading'
 
@@ -65,10 +65,10 @@ const SubmissionPage = (
     }
   }
 
-  const handleAddToBlacklist = async () => {
+  const handleAddToDenylist = async () => {
     try {
       if (data) {
-        await addUserToBlackList(data.formId, data.submitter.id)
+        await addUserToDenyList(data.formId, data.submitter.id)
         mutate(submissionUrl)
         mutate(formUrl)
       }
@@ -128,14 +128,14 @@ const SubmissionPage = (
       <Button
         size="sm"
         variantColor="red"
-        isDisabled={data.form.blacklistedUsers.some(
+        isDisabled={data.form.denylistedUsers.some(
           (user) => user.id === data.submitter.id
         )}
         mt={8}
         ml={4}
-        onClick={handleAddToBlacklist}
+        onClick={handleAddToDenylist}
       >
-        Add Submitter to Blacklist
+        Add Submitter to Denylist
       </Button>
 
       <Button ml={4} size="sm" variantColor="red" mt={8} onClick={handleDelete}>

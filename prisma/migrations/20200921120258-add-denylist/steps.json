@@ -4,7 +4,7 @@
     {
       "tag": "CreateField",
       "model": "Form",
-      "field": "blacklistedUsers",
+      "field": "denylistedUsers",
       "type": "String",
       "arity": "List"
     }

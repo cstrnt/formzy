@@ -1,4 +1,4 @@
-import { BlacklistUser, Form, Submission, User } from '@prisma/client'
+import { BlacklistUser as DenylistUser, Form, Submission, User } from '@prisma/client'
 import useSWR from 'swr'
 import { getFormUrl } from '../lib/form'
 
@@ -9,7 +9,7 @@ export function useUser(initialData?: User) {
 export type FormData = Form & {
   submissions: Submission[]
   users: User[]
-  blacklistedUsers: BlacklistUser[]
+  denylistedUsers: DenylistUser[]
 }
 
 export function useFormData(
@@ -28,8 +28,8 @@ export function useForms(initialData: Form[]) {
 }
 
 export type SubmissionData = Submission & {
-  form: Form & { blacklistedUsers: BlacklistUser[] }
-  submitter: BlacklistUser
+  form: Form & { denylistedUsers: DenylistUser[] }
+  submitter: DenylistUser
 }
 export function useSubmissions(
   submissionId: any,

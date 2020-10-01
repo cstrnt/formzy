@@ -3,11 +3,11 @@
   "steps": [
     {
       "tag": "CreateModel",
-      "model": "BlacklistUser"
+      "model": "DenylistUser"
     },
     {
       "tag": "CreateField",
-      "model": "BlacklistUser",
+      "model": "DenylistUser",
       "field": "id",
       "type": "String",
       "arity": "Required"
@@ -17,7 +17,7 @@
       "location": {
         "path": {
           "tag": "Field",
-          "model": "BlacklistUser",
+          "model": "DenylistUser",
           "field": "id"
         },
         "directive": "unique"
@@ -26,14 +26,14 @@
     {
       "tag": "UpdateField",
       "model": "Form",
-      "field": "blacklistedUsers",
-      "type": "BlacklistUser"
+      "field": "denylistedUsers",
+      "type": "DenylistUser"
     },
     {
       "tag": "CreateField",
       "model": "Submission",
       "field": "submitter",
-      "type": "BlacklistUser",
+      "type": "DenylistUser",
       "arity": "Required"
     },
     {
