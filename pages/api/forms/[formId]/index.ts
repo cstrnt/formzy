@@ -22,7 +22,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           include: {
             submissions: { orderBy: { createdAt: 'desc' } },
             users: true,
-            blacklistedUsers: true,
+            denylistedUsers: true,
           },
         })
 
