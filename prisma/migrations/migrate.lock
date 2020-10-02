@@ -8,5 +8,5 @@
 20200909125503-add-admin
 20200919055142-add-spam-filter
 20200919112735-add-tahnk-you
-20200921120258-add-blacklist
-20200921132357-add-blacklist-user-entity
+20200921120258-add-denylist
+20200921132357-add-denylist-user-entity

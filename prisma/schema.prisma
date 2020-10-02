@@ -17,7 +17,7 @@ model Form {
   hasCustomCallback Boolean @default(false)
   adminId           Int
   thankYouText      String? 
-  blacklistedUsers  BlacklistUser[]
+  denylistedUsers  DenylistUser[]
 }
 
 model Submission {
@@ -27,7 +27,7 @@ model Submission {
   form          Form      @relation(fields: [formId], references: [id])
   formId        Int
   submittedBy   String
-  submitter     BlacklistUser @relation(fields: [submittedBy], references: [id])
+  submitter     DenylistUser @relation(fields: [submittedBy], references: [id])
   isSpam        Boolean   @default(false)
 }
 
@@ -39,6 +39,6 @@ model User {
   forms             Form[]
 }
 
-model BlacklistUser {
+model DenylistUser {
   id                String @unique
 }

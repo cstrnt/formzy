@@ -16,7 +16,7 @@ model Form {
   hasCustomCallback Boolean @default(false)
   adminId           Int
   thankYouText      String? 
-  blacklistedUsers  String[]
+  denylistedUsers  String[]
 }
 
 model Submission {

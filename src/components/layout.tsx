@@ -33,7 +33,7 @@ const AvatarDropDown = ({ handleClose }: DropDownProps) => {
       px={4}
       py={1}
       onClick={(e) => e.stopPropagation()}
-      color="black"
+      color="deny"
       rounded="md"
     >
       <Link href={`/settings`}>

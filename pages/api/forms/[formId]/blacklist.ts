@@ -31,7 +31,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const form = await client.form.update({
           where: { id },
           data: {
-            blacklistedUsers: {
+            denylistedUsers: {
               connectOrCreate: {
                 create: { id: submitterId },
                 where: { id: submitterId },
@@ -46,7 +46,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       case HTTP_METHODS.DELETE: {
         const form = await client.form.update({
           where: { id },
-          data: { blacklistedUsers: { disconnect: { id: submitterId } } },
+          data: { denylistedUsers: { disconnect: { id: submitterId } } },
         })
         res.json(form)
         break
