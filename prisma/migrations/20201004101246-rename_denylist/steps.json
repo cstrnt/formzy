@@ -1,0 +1,49 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateModel",
+      "model": "DenylistUser"
+    },
+    {
+      "tag": "CreateField",
+      "model": "DenylistUser",
+      "field": "id",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "DenylistUser",
+          "field": "id"
+        },
+        "directive": "unique"
+      }
+    },
+    {
+      "tag": "DeleteModel",
+      "model": "BlacklistUser"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Form",
+      "field": "denylistedUsers",
+      "type": "DenylistUser",
+      "arity": "List"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Form",
+      "field": "blacklistedUsers"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Submission",
+      "field": "submitter",
+      "type": "DenylistUser"
+    }
+  ]
+}
