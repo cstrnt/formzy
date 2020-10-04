@@ -1,0 +1,44 @@
+datasource db {
+  provider = "postgresql"
+  url = "***"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["connectOrCreate"]
+}
+
+model Form {
+  id                Int      @default(autoincrement()) @id
+  name              String
+  users             User[]
+  submissions       Submission[]
+  callbackUrl       String?
+  hasCustomCallback Boolean @default(false)
+  adminId           Int
+  thankYouText      String? 
+  denylistedUsers  DenylistUser[]
+}
+
+model Submission {
+  id            Int       @default(autoincrement()) @id
+  createdAt     DateTime  @default(now())
+  content       Json     
+  form          Form      @relation(fields: [formId], references: [id])
+  formId        Int
+  submittedBy   String
+  submitter     DenylistUser @relation(fields: [submittedBy], references: [id])
+  isSpam        Boolean   @default(false)
+}
+
+model User {
+  id                Int      @default(autoincrement()) @id
+  email             String   @unique
+  name              String?
+  hashedPassword    String
+  forms             Form[]
+}
+
+model DenylistUser {
+  id                String @unique
+}
