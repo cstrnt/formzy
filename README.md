@@ -56,5 +56,5 @@ I personally never knew what I should do with form submissions. It was quite obv
 - Form Submissions using `<form>`
 - Multi-User Access
 - Spam detection
-- Blacklisting
+- Denylisting
 - GDPR compliant

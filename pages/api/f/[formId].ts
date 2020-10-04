@@ -36,12 +36,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         dayjs().diff(dayjs(submission.createdAt), 'second') <=
         parseInt(getConfig().publicRuntimeConfig.SPAM_TRESHOLD, 10)
     )
-    const blacklistedUsers = await client.form.findOne({
+    const denylistedUsers = await client.form.findOne({
       where: { id: Number(formId) },
-      select: { blacklistedUsers: { where: { id: uniqueIPID } } },
+      select: { denylistedUsers: { where: { id: uniqueIPID } } },
     })
 
-    if (blacklistedUsers?.blacklistedUsers.length !== 0) {
+    if (denylistedUsers?.denylistedUsers.length !== 0) {
       throw new HttpError(403, 'Unauthorized')
     }
 

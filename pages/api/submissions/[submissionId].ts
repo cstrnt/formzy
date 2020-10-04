@@ -16,7 +16,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const submission = await client.submission.findOne({
           where: { id },
           include: {
-            form: { include: { blacklistedUsers: true } },
+            form: { include: { denylistedUsers: true } },
             submitter: true,
           },
         })
