@@ -3,12 +3,14 @@ import getConfig from 'next/config'
 import { PrismaClient } from '@prisma/client'
 import crypto from 'crypto'
 import dayjs from 'dayjs'
-import { handleError, HttpError, redirectUser } from '../../../src/lib/helpers'
+import cors from 'cors';
+import { handleError, HttpError, redirectUser, runMiddleware } from '../../../src/lib/helpers'
 import { HTTP_METHODS } from '../../../src/lib/contants'
 
 const BASE_URL = getConfig().publicRuntimeConfig.BASE_URL
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
+  await runMiddleware(req, res, cors({methods: ['POST']}))
   try {
     if (req.method !== HTTP_METHODS.POST) {
       throw new HttpError(403, 'Invalid Method')

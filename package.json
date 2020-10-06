@@ -20,6 +20,7 @@
     "@emotion/styled": "^10.0.27",
     "@prisma/client": "^2.6.2",
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "dayjs": "^1.8.35",
     "emotion-theming": "^10.0.27",
     "jsonwebtoken": "^8.5.1",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@prisma/cli": "^2.6.2",
     "@types/bcryptjs": "^2.4.2",
+    "@types/cors": "^2.8.7",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^12.12.21",
     "@types/react": "^16.9.16",
